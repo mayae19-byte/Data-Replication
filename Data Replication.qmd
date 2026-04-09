@@ -1,0 +1,91 @@
+
+---
+title: "Data Replication: Alcohol Consumption and Alzheimer’s Disease"
+author: "Maya Eldani"
+format: html
+---
+
+## Introduction :Understanding whether alcohol consumption has a causal relationship with Alzheimer’s disease is an important question in public health. Observational studies have suggested that alcohol may have protective effects, but these findings may be confounded by lifestyle and demographic variables.The original study by Andrews et al. used Mendelian randomization (MR) with genome-wide association study (GWAS) data to assess causality. Their findings indicated no causal relationship between alcohol consumption and Alzheimer’s disease risk.In this replication, I approximate these findings using simplified statistical approaches.
+
+---
+
+## Replication Plan
+
+This replication includes:
+
+1. Descriptive statistics  
+2. Visualization  
+3. Linear regression  
+4. Analysis of significant SNPs  
+
+---
+
+## Methods
+
+```{r}
+
+library(tidyverse)
+library(skimr)
+data <- read_csv("C:/Users/mayae/OneDrive/Desktop/R repos/Data Replication/NIHMS1545247-supplement-2.csv")
+
+data <- data %>%
+  rename(
+    beta_exposure = `beta.exposure`,
+    beta_outcome = `beta.outcome`
+  )
+
+glimpse(data)
+
+# Descriptive statistics 
+
+summary(data$beta_exposure)
+summary(data$beta_outcome)
+
+# Visualization of SNP Effects
+
+ggplot(data, aes(x = beta_exposure, y = beta_outcome)) +
+  geom_point(alpha = 0.5) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(
+    title = "SNP Effects: Alcohol vs Alzheimer’s Outcome",
+    x = "Effect on Alcohol Consumption",
+    y = "Effect on Alzheimer’s Outcome"
+  )
+
+# Inferential analysis 
+
+model <- lm(beta_outcome ~ beta_exposure, data = data)
+summary(model)
+
+# Analysis of Significant SNPs
+
+filtered_data <- data %>%
+  filter(pval.exposure < 5e-8)
+
+ggplot(filtered_data, aes(x = beta_exposure, y = beta_outcome)) +
+  geom_point(color = "red", alpha = 0.6) +
+  geom_smooth(method = "lm") +
+  theme_minimal() +
+  labs(
+    title = "Significant SNPs Only",
+    x = "Effect on Alcohol Consumption",
+    y = "Effect on Alzheimer’s Outcome"
+  )
+
+model2 <- lm(beta_outcome ~ beta_exposure, data = filtered_data)
+summary(model2)
+
+# Discussion
+
+The results of this replication partially align with the findings reported by Andrews et al. The regression analyses suggest that there is little to no strong linear relationship between genetic predictors of alcohol consumption and Alzheimer’s disease outcomes, consistent with the original conclusion that alcohol is not causally associated with disease risk.
+
+However, this replication differs methodologically from the original study. Mendelian randomization relies on instrumental variable assumptions that cannot be fully captured using simple linear regression. As a result, the present analysis should be interpreted as an approximation rather than a direct replication.
+
+Additionally, filtering for genome-wide significant SNPs slightly alters the observed relationship, which highlights the importance of instrument strength in genetic analyses.
+
+Overall, this replication demonstrates that simplified statistical approaches can reproduce general patterns in the data, but more advanced causal inference techniques are required to draw definitive conclusions.
+
+# Conclusion 
+This analysis supports the conclusion that alcohol consumption is unlikely to have a strong causal effect on Alzheimer’s disease risk. However, the limitations of the analytical approach underscore the importance of Mendelian randomization methods for causal inference in genetic epidemiology.
+
